@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ STORE_NAME }} — Premium Kids Electric Vehicles{% endblock %}
+
+{% block content %}
+<section class="home-hero-section">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <div class="hero-pill">
+          <i class="fas fa-bolt"></i>
+          Pakistan's Premium Kids Toy Store
+        </div>
+
+        <h1 class="home-hero-title">
+          Drive Your Child's <span>Imagination</span> Forward
+        </h1>
+
+        <p class="home-hero-text">
+          Premium kids electric cars, bikes, jeeps, and toys. Safe, stylish, durable, and perfect for exciting rides.
+        </p>
+
+        <div class="hero-actions">
+          <a href="{% url 'product_list' %}" class="btn btn-primary btn-lg">
+            Shop Now <i class="fas fa-arrow-right ms-2"></i>
+          </a>
+
+          <a
+            href="https://wa.me/{{ WHATSAPP_NUMBER }}?text=Hi%20Raffay%20Kids%20Corner,%20I%20want%20to%20order%20a%20kids%20toy."
+            target="_blank"
+            class="btn btn-whatsapp btn-lg"
+          >
+            <i class="fab fa-whatsapp me-2"></i>
+            WhatsApp Order
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="hero-visual-card">
+          <div class="hero-vehicle">
+            <img src="{% static 'images/jeep.jpeg' %}" alt="Kids Electric Jeep" class="hero-main-img">
+          </div>
+
+          <div class="hero-floating-card hero-floating-top">
+            <i class="fas fa-shield-alt"></i>
+            Safe & Quality Toys
+          </div>
+
+          <div class="hero-floating-card hero-floating-bottom">
+            <i class="fas fa-truck"></i>
+            Delivery in Pakistan
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="page-eyebrow">
+          <i class="fas fa-layer-group"></i> Categories
+        </span>
+        <h2 class="section-title mb-0">Shop by Category</h2>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      {% for cat in categories %}
+      <div class="col-md-6 col-lg-4">
+        <a href="{% url 'category_products' cat.slug %}" class="rkc-home-cat-card text-decoration-none">
+          <div class="rkc-home-cat-media">
+
+            {% if cat.image %}
+              <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="rkc-home-cat-img">
+            {% else %}
+              <div class="rkc-home-cat-fallback">
+                {% if 'bike' in cat.name|lower %}
+                  🚲
+                {% elif 'car' in cat.name|lower %}
+                  🚗
+                {% elif 'jeep' in cat.name|lower %}
+                  🚙
+                {% else %}
+                  📦
+                {% endif %}
+              </div>
+            {% endif %}
+
+            <div class="rkc-home-cat-shade"></div>
+
+            <div class="rkc-home-cat-info">
+              <div class="rkc-home-cat-info-box">
+                <h5>{{ cat.name }}</h5>
+                <p>{{ cat.product_count }} Product{{ cat.product_count|pluralize }}</p>
+                <span class="rkc-home-cat-btn">
+                  Explore <i class="fas fa-arrow-right ms-1"></i>
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </a>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="empty-state">
+          <div class="empty-icon">📦</div>
+          <h4 class="empty-title">No categories yet</h4>
+          <p class="empty-text">Add categories from the admin panel.</p>
+          <a href="/admin/store/category/add/" class="btn btn-primary mt-2">Add Category</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% if featured_products %}
+<section class="py-5 soft-section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="page-eyebrow">
+          <i class="fas fa-star"></i> Featured
+        </span>
+        <h2 class="section-title mb-0">Featured Products</h2>
+      </div>
+
+      <a href="{% url 'product_list' %}" class="btn btn-outline-primary btn-sm">
+        View All
+      </a>
+    </div>
+
+    <div class="row g-4">
+      {% for product in featured_products %}
+      <div class="col-sm-6 col-lg-4">
+        {% include 'store/partials/product_card.html' %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="py-5">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="page-eyebrow">
+          <i class="fas fa-clock"></i> New Arrivals
+        </span>
+        <h2 class="section-title mb-0">Latest Products</h2>
+      </div>
+
+      <a href="{% url 'product_list' %}" class="btn btn-outline-primary btn-sm">
+        View All
+      </a>
+    </div>
+
+    <div class="row g-4">
+      {% for product in latest_products %}
+      <div class="col-sm-6 col-lg-3">
+        {% include 'store/partials/product_card.html' %}
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="empty-state">
+          <div class="empty-icon">🛒</div>
+          <h4 class="empty-title">No products yet</h4>
+          <p class="empty-text">Add products via the admin panel.</p>
+          <a href="/admin/store/product/add/" class="btn btn-primary mt-2">Add Product</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="py-5 soft-section">
+  <div class="container text-center">
+    <span class="page-eyebrow">
+      <i class="fas fa-thumbs-up"></i> Why Choose Us
+    </span>
+
+    <h2 class="section-title text-center mx-auto why-title">
+      Trusted Kids Toys in Pakistan
+    </h2>
+
+    <div class="row g-4 mt-2">
+      <div class="col-sm-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <h6>Safe Products</h6>
+          <p>Products are selected with safety and quality in mind.</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon">🚚</div>
+          <h6>Fast Support</h6>
+          <p>Quick order support for customers through WhatsApp.</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon">💬</div>
+          <h6>WhatsApp Orders</h6>
+          <p>Ask questions and place orders directly on WhatsApp.</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h6>Premium Toys</h6>
+          <p>Stylish electric toys for fun and memorable rides.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

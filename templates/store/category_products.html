@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ category.name }} — {{ STORE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home' %}">Home</a>
+      </li>
+      <li class="breadcrumb-item active">
+        {{ category.name }}
+      </li>
+    </ol>
+  </nav>
+
+  <div class="page-head d-flex justify-content-between align-items-end flex-wrap gap-3">
+    <div>
+      <span class="page-eyebrow">
+        <i class="fas fa-layer-group"></i> Category
+      </span>
+
+      <h1 class="page-title">{{ category.name }}</h1>
+
+      <p class="page-subtitle">
+        Browse all {{ category.name|lower }} available at {{ STORE_NAME }}.
+      </p>
+    </div>
+
+    <span class="page-eyebrow mb-0">
+      {{ page_obj.paginator.count }} product{{ page_obj.paginator.count|pluralize }}
+    </span>
+  </div>
+
+  <div class="row g-4">
+    {% for product in page_obj %}
+      <div class="col-sm-6 col-lg-3">
+        {% include 'store/partials/product_card.html' %}
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="empty-state">
+          <div class="empty-icon">📦</div>
+          <h4 class="empty-title">No products in this category yet</h4>
+          <p class="empty-text">Add products from admin panel or browse other products.</p>
+          <a href="{% url 'product_list' %}" class="btn btn-primary mt-2">
+            Browse All Products
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <nav class="mt-5 d-flex justify-content-center">
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+          &laquo;
+        </a>
+      </li>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+      <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+        <a class="page-link" href="?page={{ num }}">
+          {{ num }}
+        </a>
+      </li>
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+          &raquo;
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

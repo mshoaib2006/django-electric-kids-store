@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Register — {{ STORE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+        <div class="auth-card">
+          <div class="auth-icon">⚡</div>
+
+          <h1 class="auth-title">Create Account</h1>
+
+          <p class="auth-subtitle">
+            Create your {{ STORE_NAME }} account to order kids electric cars, bikes, jeeps, and toys.
+          </p>
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+              <div class="auth-error-box">
+                {% for error in form.non_field_errors %}
+                  <div>{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <div class="row g-3">
+              {% for field in form %}
+              <div class="col-12">
+                <label class="form-label" for="{{ field.id_for_label }}">
+                  {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                  <div class="auth-help-text">
+                    {{ field.help_text|safe }}
+                  </div>
+                {% endif %}
+
+                {% if field.errors %}
+                  <div class="auth-field-error">
+                    {% for error in field.errors %}
+                      <div>{{ error }}</div>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary auth-submit-btn w-100 mt-4">
+              Create Account
+            </button>
+          </form>
+
+          <p class="auth-switch-text">
+            Already have an account?
+            <a href="{% url 'login' %}">Login</a>
+          </p>
+
+          <div class="auth-benefits">
+            <div class="auth-benefit">
+              <span>🛡️</span>
+              Secure Account
+            </div>
+
+            <div class="auth-benefit">
+              <span>🚚</span>
+              COD Orders
+            </div>
+
+            <div class="auth-benefit">
+              <span>💬</span>
+              WhatsApp Help
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

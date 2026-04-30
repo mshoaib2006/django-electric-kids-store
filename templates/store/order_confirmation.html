@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Confirmed — {{ STORE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center text-center">
+    <div class="col-md-9 col-lg-7">
+      <div class="card p-4 p-md-5">
+        <div style="font-size:5rem;margin-bottom:18px">✅</div>
+
+        <h1 class="page-title mb-2">Order Confirmed!</h1>
+
+        <p class="page-subtitle">
+          Thank you, {{ order.full_name }}. Your order has been placed successfully.
+        </p>
+
+        <div class="info-box my-4 text-start">
+          <div class="d-flex justify-content-between mb-2">
+            <span style="color:var(--text-muted)">Order Number</span>
+            <strong style="color:var(--primary)">{{ order.order_number }}</strong>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2">
+            <span style="color:var(--text-muted)">Status</span>
+            <span class="status-pill status-warning">{{ order.get_status_display }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2">
+            <span style="color:var(--text-muted)">Payment</span>
+            <strong>{{ order.get_payment_method_display }}</strong>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <span style="color:var(--text-muted)">Total Amount</span>
+            <strong class="price-font" style="color:var(--primary)">
+              Rs. {{ order.total_amount|floatformat:0 }}
+            </strong>
+          </div>
+        </div>
+
+        <div class="text-start mb-4">
+          <h6 class="mb-3" style="color:var(--primary);font-weight:900;">Items Ordered</h6>
+
+          {% for item in order.items.all %}
+          <div class="d-flex justify-content-between py-2" style="border-bottom:1px solid var(--border)">
+            <span>{{ item.product.name }} × {{ item.quantity }}</span>
+            <strong style="color:var(--primary)">Rs. {{ item.subtotal|floatformat:0 }}</strong>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="whatsapp-box mb-4 text-start">
+          <strong><i class="fab fa-whatsapp me-2"></i> Confirm via WhatsApp</strong>
+          <p class="mb-0 mt-2" style="color:var(--text-soft);font-size:0.9rem">
+            Send a WhatsApp message to confirm your order and get delivery updates.
+          </p>
+        </div>
+
+        <div class="d-flex gap-3 flex-column flex-sm-row">
+          <a
+            href="https://wa.me/{{ WHATSAPP_NUMBER }}?text=Hi%20Raffay%20Kids%20Corner,%20my%20order%20number%20is%20{{ order.order_number }}.%20Please%20confirm%20my%20order."
+            target="_blank"
+            class="btn btn-whatsapp flex-fill py-3"
+          >
+            <i class="fab fa-whatsapp me-2"></i>
+            Confirm on WhatsApp
+          </a>
+
+          <a href="{% url 'home' %}" class="btn btn-outline-primary flex-fill py-3">
+            Continue Shopping
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}All Products — {{ STORE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="page-head">
+    <span class="page-eyebrow">
+      <i class="fas fa-bolt"></i> Premium Kids Toys
+    </span>
+
+    <h1 class="page-title">
+      {% if search_query %}
+        Results for “{{ search_query }}”
+      {% else %}
+        All Products
+      {% endif %}
+    </h1>
+
+    <p class="page-subtitle">
+      {{ page_obj.paginator.count }} product{{ page_obj.paginator.count|pluralize }} found.
+    </p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-3">
+      <div class="card p-4 filter-card">
+        <h5 class="mb-4" style="color:var(--primary);font-weight:900;">
+          Filters
+        </h5>
+
+        <form method="get" id="filter-form">
+          <div class="mb-4">
+            <label class="form-label">Category</label>
+
+            {% for cat in categories %}
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="category"
+                id="cat-{{ cat.slug }}"
+                value="{{ cat.slug }}"
+                {% if category_slug == cat.slug %}checked{% endif %}
+                onchange="document.getElementById('filter-form').submit()"
+              >
+
+              <label class="form-check-label" for="cat-{{ cat.slug }}">
+                {{ cat.name }}
+              </label>
+            </div>
+            {% endfor %}
+
+            {% if category_slug %}
+              <a href="{% url 'product_list' %}" class="small fw-bold">
+                Clear category
+              </a>
+            {% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Price Range</label>
+
+            <div class="d-flex gap-2">
+              <input
+                type="number"
+                name="min_price"
+                class="form-control form-control-sm"
+                placeholder="Min"
+                value="{{ request.GET.min_price }}"
+              >
+
+              <input
+                type="number"
+                name="max_price"
+                class="form-control form-control-sm"
+                placeholder="Max"
+                value="{{ request.GET.max_price }}"
+              >
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Sort By</label>
+
+            <select name="sort" class="form-select form-select-sm" onchange="document.getElementById('filter-form').submit()">
+              <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+              <option value="price_low" {% if sort_by == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+              <option value="price_high" {% if sort_by == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+              <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name A-Z</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">
+            Apply Filter
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-9">
+      <div class="row g-4">
+        {% for product in page_obj %}
+          <div class="col-sm-6 col-xl-4">
+            {% include 'store/partials/product_card.html' %}
+          </div>
+        {% empty %}
+          <div class="col-12">
+            <div class="empty-state">
+              <div class="empty-icon">🔍</div>
+              <h4 class="empty-title">No products found</h4>
+              <p class="empty-text">Try another keyword or change your filters.</p>
+              <a href="{% url 'product_list' %}" class="btn btn-primary mt-2">
+                Browse All
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      {% if page_obj.has_other_pages %}
+      <nav class="mt-5 d-flex justify-content-center">
+        <ul class="pagination">
+          {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&category={{ category_slug }}&sort={{ sort_by }}"
+            >
+              &laquo;
+            </a>
+          </li>
+          {% endif %}
+
+          {% for num in page_obj.paginator.page_range %}
+          <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a
+              class="page-link"
+              href="?page={{ num }}&q={{ search_query }}&category={{ category_slug }}&sort={{ sort_by }}"
+            >
+              {{ num }}
+            </a>
+          </li>
+          {% endfor %}
+
+          {% if page_obj.has_next %}
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&category={{ category_slug }}&sort={{ sort_by }}"
+            >
+              &raquo;
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

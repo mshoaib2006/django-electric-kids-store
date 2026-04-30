@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout — {{ STORE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="page-head">
+    <span class="page-eyebrow">
+      <i class="fas fa-credit-card"></i> Secure Checkout
+    </span>
+
+    <h1 class="page-title">Checkout</h1>
+
+    <p class="page-subtitle">
+      Enter your delivery details and place your Cash on Delivery order.
+    </p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card p-4 p-md-5">
+        <h5 class="mb-4" style="color:var(--primary);font-weight:900;">
+          Delivery Information
+        </h5>
+
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">First Name *</label>
+              {{ form.first_name }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Last Name *</label>
+              {{ form.last_name }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Email *</label>
+              {{ form.email }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Phone Number *</label>
+              {{ form.phone }}
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Full Address *</label>
+              {{ form.address }}
+            </div>
+
+            <div class="col-md-8">
+              <label class="form-label">City *</label>
+              {{ form.city }}
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Postal Code</label>
+              {{ form.postal_code }}
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Payment Method *</label>
+              {{ form.payment_method }}
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Special Notes</label>
+              {{ form.notes }}
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-3 mt-4">
+            <i class="fas fa-check-circle me-2"></i>
+            Place Order
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card p-4 summary-card">
+        <h5 class="mb-4" style="color:var(--primary);font-weight:900;">
+          Order Review
+        </h5>
+
+        {% for item in cart %}
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-3" style="border-bottom:1px solid var(--border)">
+          <div class="d-flex align-items-center gap-3">
+            {% with img=item.product.primary_image %}
+              {% if img %}
+                <img
+                  src="{{ img.image.url }}"
+                  alt="{{ item.product.name }}"
+                  style="width:54px;height:48px;object-fit:cover;border-radius:12px"
+                >
+              {% else %}
+                <div style="width:54px;height:48px;border-radius:12px;background:var(--dark2);display:flex;align-items:center;justify-content:center;font-size:1.6rem">
+                  🚗
+                </div>
+              {% endif %}
+            {% endwith %}
+
+            <div>
+              <div style="font-weight:800">{{ item.product.name }}</div>
+              <div style="font-size:0.85rem;color:var(--text-muted)">
+                Quantity: {{ item.quantity }}
+              </div>
+            </div>
+          </div>
+
+          <strong style="color:var(--primary)">
+            Rs. {{ item.total_price|floatformat:0 }}
+          </strong>
+        </div>
+        {% endfor %}
+
+        <div class="d-flex justify-content-between mb-2">
+          <span style="color:var(--text-muted)">Subtotal</span>
+          <strong>Rs. {{ cart_total|floatformat:0 }}</strong>
+        </div>
+
+        <div class="d-flex justify-content-between mb-3">
+          <span style="color:var(--text-muted)">Delivery</span>
+          <strong style="color:var(--success)">FREE</strong>
+        </div>
+
+        <div class="d-flex justify-content-between mb-3">
+          <span style="color:var(--text-muted)">Payment</span>
+          <strong>Cash on Delivery</strong>
+        </div>
+
+        <hr style="border-color:var(--border)">
+
+        <div class="d-flex justify-content-between align-items-center">
+          <strong>Total</strong>
+          <strong class="price-font" style="font-size:1.35rem;color:var(--primary)">
+            Rs. {{ cart_total|floatformat:0 }}
+          </strong>
+        </div>
+
+        <div class="whatsapp-box mt-4">
+          <strong>
+            <i class="fab fa-whatsapp me-2"></i>
+            WhatsApp Confirmation
+          </strong>
+
+          <p class="mb-0 mt-2" style="color:var(--text-soft);font-size:0.9rem">
+            After placing your order, you can confirm it on WhatsApp and get order updates.
+          </p>
+        </div>
+
+        <a
+          href="https://wa.me/{{ WHATSAPP_NUMBER }}?text=Hi%20Raffay%20Kids%20Corner,%20I%20want%20to%20ask%20about%20my%20checkout%20order."
+          target="_blank"
+          class="btn btn-whatsapp w-100 py-2 mt-3"
+        >
+          <i class="fab fa-whatsapp me-2"></i>
+          Contact on WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

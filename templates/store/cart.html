@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block title %}Shopping Cart — {{ STORE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="page-head">
+    <span class="page-eyebrow">
+      <i class="fas fa-shopping-cart"></i> Your Cart
+    </span>
+    <h1 class="page-title">Shopping Cart</h1>
+    <p class="page-subtitle">Review your selected toys before checkout.</p>
+  </div>
+
+  {% if cart|length > 0 %}
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card overflow-hidden">
+        {% for item in cart %}
+        <div class="cart-row" id="cart-item-{{ item.product.id }}">
+          <div class="cart-img">
+            {% with img=item.product.primary_image %}
+              {% if img %}
+                <img src="{{ img.image.url }}" alt="{{ item.product.name }}">
+              {% else %}
+                <div class="h-100 d-flex align-items-center justify-content-center fs-2">🚗</div>
+              {% endif %}
+            {% endwith %}
+          </div>
+
+          <div>
+            <a href="{{ item.product.get_absolute_url }}" class="text-decoration-none fw-bold" style="color:var(--text)">
+              {{ item.product.name }}
+            </a>
+            <div class="mt-1" style="color:var(--primary);font-weight:900">
+              Rs. {{ item.price|floatformat:0 }} each
+            </div>
+          </div>
+
+          <div class="cart-actions">
+            <form class="update-form" data-product-id="{{ item.product.id }}" action="{% url 'cart_update' item.product.id %}" method="post">
+              {% csrf_token %}
+              <div class="qty-control">
+                <button type="button" onclick="updateQty({{ item.product.id }}, -1)">-</button>
+                <input
+                  type="number"
+                  name="quantity"
+                  value="{{ item.quantity }}"
+                  min="0"
+                  max="{{ item.product.stock }}"
+                  class="qty-input"
+                  data-product-id="{{ item.product.id }}"
+                >
+                <button type="button" onclick="updateQty({{ item.product.id }}, 1)">+</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="cart-total text-lg-end">
+            <div class="fw-black" id="total-{{ item.product.id }}" style="color:var(--text);font-weight:900">
+              Rs. {{ item.total_price|floatformat:0 }}
+            </div>
+          </div>
+
+          <form class="cart-remove" action="{% url 'cart_remove' item.product.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm" style="color:var(--danger)" title="Remove">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+
+      <a href="{% url 'product_list' %}" class="btn btn-outline-primary mt-3">
+        <i class="fas fa-arrow-left me-2"></i> Continue Shopping
+      </a>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card p-4 summary-card">
+        <h5 class="mb-4" style="color:var(--primary);font-weight:900;">Order Summary</h5>
+
+        <div class="d-flex justify-content-between mb-2">
+          <span style="color:var(--text-muted)">Subtotal ({{ cart|length }} items)</span>
+          <strong id="cart-grand-total">Rs. {{ cart_total|floatformat:0 }}</strong>
+        </div>
+
+        <div class="d-flex justify-content-between mb-2">
+          <span style="color:var(--text-muted)">Delivery</span>
+          <strong style="color:var(--success)">FREE</strong>
+        </div>
+
+        <div class="d-flex justify-content-between mb-3">
+          <span style="color:var(--text-muted)">Payment</span>
+          <strong>Cash on Delivery</strong>
+        </div>
+
+        <hr style="border-color:var(--border)">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <strong>Total</strong>
+          <strong id="cart-final-total" class="price-font" style="font-size:1.35rem;color:var(--primary)">
+            Rs. {{ cart_total|floatformat:0 }}
+          </strong>
+        </div>
+
+        <a href="{% url 'checkout' %}" class="btn btn-primary w-100 py-3">
+          Proceed to Checkout <i class="fas fa-arrow-right ms-2"></i>
+        </a>
+
+        <a
+          href="https://wa.me/{{ WHATSAPP_NUMBER }}?text=Hi%20Raffay%20Kids%20Corner,%20I%20want%20to%20place%20an%20order."
+          target="_blank"
+          class="btn btn-whatsapp w-100 py-2 mt-2"
+        >
+          <i class="fab fa-whatsapp me-2"></i>
+          Order via WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🛒</div>
+    <h3 class="empty-title">Your cart is empty</h3>
+    <p class="empty-text">Explore our kids toy collection and add your favorite ride.</p>
+    <a href="{% url 'product_list' %}" class="btn btn-primary btn-lg mt-2">Shop Now</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateQty(productId, delta) {
+  const input = document.querySelector(`.qty-input[data-product-id="${productId}"]`);
+  if (!input) return;
+
+  const max = parseInt(input.getAttribute("max")) || 99;
+  let value = parseInt(input.value || "0") + delta;
+
+  if (value < 0) value = 0;
+  if (value > max) value = max;
+
+  input.value = value;
+
+  const form = document.querySelector(`.update-form[data-product-id="${productId}"]`);
+  const formData = new FormData(form);
+
+  fetch(form.action, {
+    method: "POST",
+    headers: { "X-Requested-With": "XMLHttpRequest" },
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      if (value === 0) {
+        const row = document.getElementById(`cart-item-${productId}`);
+        if (row) row.remove();
+      } else {
+        document.getElementById(`total-${productId}`).textContent =
+          "Rs. " + parseFloat(data.item_total).toLocaleString("en-PK", { maximumFractionDigits: 0 });
+      }
+
+      document.getElementById("cart-grand-total").textContent =
+        "Rs. " + parseFloat(data.cart_total).toLocaleString("en-PK", { maximumFractionDigits: 0 });
+
+      document.getElementById("cart-final-total").textContent =
+        "Rs. " + parseFloat(data.cart_total).toLocaleString("en-PK", { maximumFractionDigits: 0 });
+
+      showToast("Cart updated", "success");
+    }
+  })
+  .catch(() => showToast("Could not update cart", "error"));
+}
+</script>
+{% endblock %}

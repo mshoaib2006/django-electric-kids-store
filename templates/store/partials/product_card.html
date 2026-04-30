@@ -1,0 +1,91 @@
+<div class="product-card pro-product-card">
+  <a href="{{ product.get_absolute_url }}" class="pro-product-media" aria-label="View {{ product.name }}">
+    {% with img=product.primary_image %}
+      {% if img %}
+        <img src="{{ img.image.url }}" alt="{{ product.name }}" loading="lazy">
+      {% else %}
+        <div class="pro-product-placeholder">
+          {% if 'bike' in product.name|lower %}
+            🚲
+          {% elif 'car' in product.name|lower %}
+            🚗
+          {% else %}
+            🚙
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="pro-product-badges">
+      {% if product.discount_percentage > 0 %}
+        <span class="pro-badge pro-badge-discount">
+          -{{ product.discount_percentage }}%
+        </span>
+      {% endif %}
+
+      {% if not product.in_stock %}
+        <span class="pro-badge pro-badge-danger">
+          Out of Stock
+        </span>
+      {% elif product.stock <= 5 %}
+        <span class="pro-badge pro-badge-warning">
+          Only {{ product.stock }} left
+        </span>
+      {% endif %}
+    </div>
+  </a>
+
+  <div class="pro-product-body">
+    <div>
+      <a href="{{ product.get_absolute_url }}" class="pro-product-name" title="{{ product.name }}">
+        {{ product.name }}
+      </a>
+
+      <div class="pro-rating">
+        {% with rating=product.average_rating %}
+          <div class="pro-stars">
+            {% for i in "12345"|make_list %}
+              {% if forloop.counter <= rating %}
+                <i class="fas fa-star active"></i>
+              {% else %}
+                <i class="fas fa-star"></i>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <span class="pro-review-count">({{ product.review_count }})</span>
+        {% endwith %}
+      </div>
+    </div>
+
+    <div class="pro-price-row">
+      <span class="pro-price">Rs. {{ product.price|floatformat:0 }}</span>
+
+      {% if product.original_price %}
+        <span class="pro-old-price">Rs. {{ product.original_price|floatformat:0 }}</span>
+      {% endif %}
+    </div>
+
+    <div class="pro-product-actions">
+      <a href="{{ product.get_absolute_url }}" class="pro-btn pro-btn-outline">
+        Details
+      </a>
+
+      {% if product.in_stock %}
+        <button
+          type="button"
+          class="pro-btn pro-btn-primary btn-add-cart"
+          data-url="{% url 'cart_add' product.id %}"
+          data-name="{{ product.name }}"
+          aria-label="Add {{ product.name }} to cart"
+        >
+          <i class="fas fa-cart-plus"></i>
+          <span>Add</span>
+        </button>
+      {% else %}
+        <button type="button" class="pro-btn pro-btn-disabled" disabled>
+          Sold Out
+        </button>
+      {% endif %}
+    </div>
+  </div>
+</div>

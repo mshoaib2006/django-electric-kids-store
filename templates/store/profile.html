@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile — {{ STORE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="page-head">
+    <span class="page-eyebrow">
+      <i class="fas fa-user-circle"></i> Customer Account
+    </span>
+
+    <h1 class="page-title">My Profile</h1>
+
+    <p class="page-subtitle">
+      Manage your personal details and view your order history.
+    </p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <div class="card profile-card p-4">
+        <div class="profile-avatar">
+          {% if user.profile.avatar %}
+            <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}">
+          {% else %}
+            👤
+          {% endif %}
+        </div>
+
+        <h5>{{ user.get_full_name|default:user.username }}</h5>
+
+        <p>{{ user.email }}</p>
+
+        <div class="profile-meta">
+          <span>
+            <i class="fas fa-calendar-alt"></i>
+            Member since {{ user.date_joined|date:"M Y" }}
+          </span>
+        </div>
+
+        <a href="{% url 'product_list' %}" class="btn btn-outline-primary w-100 mt-4">
+          Continue Shopping
+        </a>
+
+        <a
+          href="https://wa.me/{{ WHATSAPP_NUMBER }}?text=Hi%20Raffay%20Kids%20Corner,%20I%20want%20to%20ask%20about%20your%20products."
+          target="_blank"
+          class="btn btn-whatsapp w-100 mt-2"
+        >
+          <i class="fab fa-whatsapp me-2"></i>
+          Contact WhatsApp
+        </a>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card p-4 p-md-5 mb-4">
+        <h5 class="admin-card-title mb-3">Edit Profile</h5>
+
+        <p class="admin-card-subtitle mb-4">
+          Keep your contact and delivery information updated.
+        </p>
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">First Name</label>
+              <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Last Name</label>
+              <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control" value="{{ user.email }}">
+            </div>
+
+            {% for field in profile_form %}
+            <div class="col-12">
+              <label class="form-label">{{ field.label }}</label>
+
+              {{ field }}
+
+              {% if field.errors %}
+              <div class="mt-1" style="color:#fca5a5;font-size:0.85rem">
+                {{ field.errors.0 }}
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+
+          <button type="submit" class="btn btn-primary mt-4 px-4">
+            <i class="fas fa-save me-2"></i>
+            Save Changes
+          </button>
+        </form>
+      </div>
+
+      <div class="card p-4 p-md-5">
+        <div class="section-head mb-3">
+          <div>
+            <h5 class="admin-card-title">My Orders</h5>
+            <p class="admin-card-subtitle">Track your recent orders and status.</p>
+          </div>
+        </div>
+
+        <div class="profile-order-list">
+          {% for order in orders %}
+          <div class="profile-order-card">
+            <div>
+              <span class="order-code">{{ order.order_number }}</span>
+
+              <p>
+                {{ order.created_at|date:"M d, Y" }}
+                • {{ order.items.count }} item{{ order.items.count|pluralize }}
+              </p>
+            </div>
+
+            <div class="profile-order-right">
+              <strong>Rs. {{ order.total_amount|floatformat:0 }}</strong>
+
+              {% if order.status == 'delivered' or order.status == 'completed' %}
+                <span class="status-pill status-success">{{ order.get_status_display }}</span>
+              {% elif order.status == 'shipped' %}
+                <span class="status-pill status-info">{{ order.get_status_display }}</span>
+              {% elif order.status == 'cancelled' %}
+                <span class="status-pill status-danger">{{ order.get_status_display }}</span>
+              {% else %}
+                <span class="status-pill status-warning">{{ order.get_status_display }}</span>
+              {% endif %}
+            </div>
+          </div>
+          {% empty %}
+          <div class="empty-state">
+            <div class="empty-icon">🛒</div>
+
+            <h4 class="empty-title">No orders yet</h4>
+
+            <p class="empty-text">
+              Start shopping and your order history will appear here.
+            </p>
+
+            <a href="{% url 'product_list' %}" class="btn btn-primary mt-2">
+              Start Shopping
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

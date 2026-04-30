@@ -1,0 +1,266 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{% block title %}⚡ {{ STORE_NAME }}{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@500;600;700;800;900&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg sticky-top main-navbar">
+  <div class="container">
+    <a class="navbar-brand brand-logo" href="{% url 'home' %}">
+      <span class="brand-icon">⚡</span> Raffay <span>Kids Corner</span>
+    </a>
+
+    <button class="navbar-toggler navbar-dark border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <form class="d-flex mx-lg-auto my-3 my-lg-0 search-form" action="{% url 'search' %}" method="get">
+        <input class="form-control" type="search" name="q" placeholder="Search kids toys..." value="{{ request.GET.q }}">
+        <button class="btn" type="submit" aria-label="Search">
+          <i class="fas fa-search"></i>
+        </button>
+      </form>
+
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'product_list' %}">
+            Products
+          </a>
+        </li>
+
+        {% if user.is_staff %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'dashboard' %}">
+            <i class="fas fa-chart-line me-1"></i> Dashboard
+          </a>
+        </li>
+        {% endif %}
+
+        <li class="nav-item">
+          <a class="nav-link cart-link" href="{% url 'cart_detail' %}">
+            <i class="fas fa-shopping-cart"></i>
+            {% if cart_count > 0 %}
+              <span class="cart-badge">{{ cart_count }}</span>
+            {% endif %}
+          </a>
+        </li>
+
+        {% if user.is_authenticated %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle user-dropdown" href="#" data-bs-toggle="dropdown">
+            <i class="fas fa-user-circle me-1"></i>
+            {{ user.first_name|default:user.username }}
+          </a>
+
+          <ul class="dropdown-menu dropdown-menu-end pro-dropdown">
+            <li>
+              <a class="dropdown-item" href="{% url 'profile' %}">
+                <i class="fas fa-user me-2"></i> Profile
+              </a>
+            </li>
+
+            {% if user.is_staff %}
+            <li>
+              <a class="dropdown-item" href="/admin/">
+                <i class="fas fa-cog me-2"></i> Admin Panel
+              </a>
+            </li>
+            {% endif %}
+
+            <li><hr class="dropdown-divider"></li>
+
+            <li>
+              <a class="dropdown-item danger" href="{% url 'logout' %}">
+                <i class="fas fa-sign-out-alt me-2"></i> Logout
+              </a>
+            </li>
+          </ul>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'login' %}">Login</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="btn btn-primary btn-sm px-3 ms-lg-1" href="{% url 'register' %}">
+            Sign Up
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+{% if messages %}
+<div class="container mt-3">
+  {% for msg in messages %}
+  <div class="alert pro-alert alert-dismissible fade show">
+    {{ msg }}
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<div id="toast-container"></div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="row g-4 mb-4">
+      <div class="col-md-4">
+        <a class="footer-brand text-decoration-none" href="{% url 'home' %}">
+          ⚡ Raffay <span>Kids Corner</span>
+        </a>
+
+        <p class="footer-text mt-3">
+          Premium kids electric cars, bikes, jeeps, and toys. Safe, stylish, and perfect for every child.
+        </p>
+
+        <a
+          href="https://wa.me/{{ WHATSAPP_NUMBER }}?text=Hi%20Raffay%20Kids%20Corner,%20I%20want%20to%20ask%20about%20your%20products."
+          target="_blank"
+          class="btn btn-whatsapp btn-sm mt-2"
+        >
+          <i class="fab fa-whatsapp me-2"></i> WhatsApp Us
+        </a>
+      </div>
+
+      <div class="col-md-2">
+        <h6 class="footer-title">Shop</h6>
+        <ul class="footer-links">
+          <li><a href="{% url 'product_list' %}">All Products</a></li>
+          <li><a href="{% url 'product_list' %}?category=electric-bikes">Electric Bikes</a></li>
+          <li><a href="{% url 'product_list' %}?category=electric-cars">Electric Cars</a></li>
+          <li><a href="{% url 'product_list' %}?category=electric-jeeps">Electric Jeeps</a></li>
+        </ul>
+      </div>
+
+      <div class="col-md-3">
+        <h6 class="footer-title">Account</h6>
+        <ul class="footer-links">
+          {% if user.is_authenticated %}
+            <li><a href="{% url 'profile' %}">My Profile</a></li>
+            <li><a href="{% url 'logout' %}">Logout</a></li>
+          {% else %}
+            <li><a href="{% url 'login' %}">Login</a></li>
+            <li><a href="{% url 'register' %}">Register</a></li>
+          {% endif %}
+          <li><a href="{% url 'cart_detail' %}">Cart</a></li>
+        </ul>
+      </div>
+
+      <div class="col-md-3">
+        <h6 class="footer-title">Contact</h6>
+
+        <p class="footer-contact">
+          <a
+            href="https://wa.me/{{ WHATSAPP_NUMBER }}?text=Hi%20Raffay%20Kids%20Corner,%20I%20want%20to%20ask%20about%20your%20products."
+            target="_blank"
+            style="color:inherit;text-decoration:none"
+          >
+            <i class="fab fa-whatsapp"></i> {{ STORE_PHONE_DISPLAY }}
+          </a>
+        </p>
+
+        <p class="footer-contact">
+          <i class="fas fa-envelope"></i> {{ STORE_EMAIL }}
+        </p>
+
+        <p class="footer-contact">
+          <i class="fas fa-map-marker-alt"></i> {{ STORE_LOCATION }}
+        </p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      © 2025 {{ STORE_NAME }}. All rights reserved. Cash on Delivery Available.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  function showToast(message, type = "success") {
+    const container = document.getElementById("toast-container");
+    if (!container) return;
+
+    const toast = document.createElement("div");
+    toast.className = `toast-msg toast-${type}`;
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = "0";
+      toast.style.transform = "translateX(80px)";
+      setTimeout(() => toast.remove(), 260);
+    }, 2500);
+  }
+
+  document.addEventListener("click", function (event) {
+    const button = event.target.closest(".btn-add-cart");
+    if (!button) return;
+
+    event.preventDefault();
+
+    const url = button.dataset.url;
+    const productName = button.dataset.name || "Product";
+    const csrfInput = document.querySelector("input[name='csrfmiddlewaretoken']");
+    const csrfToken = csrfInput ? csrfInput.value : "{{ csrf_token }}";
+
+    const formData = new FormData();
+    formData.append("quantity", "1");
+    formData.append("csrfmiddlewaretoken", csrfToken);
+
+    button.disabled = true;
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showToast(`${productName} added to cart`, "success");
+        setTimeout(() => window.location.reload(), 600);
+      } else {
+        showToast(data.message || "Could not add item", "error");
+      }
+    })
+    .catch(() => {
+      showToast("Something went wrong", "error");
+    })
+    .finally(() => {
+      button.disabled = false;
+    });
+  });
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Login — {{ STORE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-10 col-md-7 col-lg-5 col-xl-4">
+        <div class="auth-card">
+          <div class="auth-icon">⚡</div>
+
+          <h1 class="auth-title">Welcome Back</h1>
+
+          <p class="auth-subtitle">
+            Login to track your orders, manage your cart, and continue shopping at {{ STORE_NAME }}.
+          </p>
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if next %}
+              <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            {% if form.errors %}
+              <div class="auth-error-box">
+                Invalid username or password. Please check your details and try again.
+              </div>
+            {% endif %}
+
+            <div class="mb-3">
+              <label class="form-label" for="id_username">Username</label>
+
+              <input
+                type="text"
+                name="username"
+                id="id_username"
+                class="form-control"
+                placeholder="Enter your username"
+                autocomplete="username"
+                autofocus
+                required
+              >
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label" for="id_password">Password</label>
+
+              <div class="auth-password-wrap">
+                <input
+                  type="password"
+                  name="password"
+                  id="id_password"
+                  class="form-control"
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                  required
+                >
+
+                <button type="button" class="auth-password-toggle" onclick="toggleAuthPassword('id_password', this)">
+                  Show
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary auth-submit-btn w-100">
+              Login
+            </button>
+          </form>
+
+          <p class="auth-switch-text">
+            Don't have an account?
+            <a href="{% url 'register' %}">Create Account</a>
+          </p>
+
+          <div class="auth-benefits">
+            <div class="auth-benefit">
+              <span>🛒</span>
+              Easy Orders
+            </div>
+
+            <div class="auth-benefit">
+              <span>🚚</span>
+              COD Delivery
+            </div>
+
+            <div class="auth-benefit">
+              <span>💬</span>
+              WhatsApp Help
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleAuthPassword(inputId, button) {
+  const input = document.getElementById(inputId);
+  if (!input || !button) return;
+
+  if (input.type === "password") {
+    input.type = "text";
+    button.textContent = "Hide";
+  } else {
+    input.type = "password";
+    button.textContent = "Show";
+  }
+}
+</script>
+{% endblock %}
