@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load local .env file
 load_dotenv(BASE_DIR / ".env")
 
 
@@ -43,18 +42,22 @@ CSRF_TRUSTED_ORIGINS = [
 
 # =========================
 # Applications
+# IMPORTANT:
+# django.contrib.staticfiles is placed BEFORE cloudinary_storage
+# so Django normal collectstatic handles CSS/JS/static images.
+# Cloudinary is only for uploaded media images.
 # =========================
 
 INSTALLED_APPS = [
-    "cloudinary_storage",
-    "cloudinary",
-
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
+    "cloudinary",
+    "cloudinary_storage",
 
     "store",
 ]
@@ -67,8 +70,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
 
-    # WhiteNoise middleware can serve static files on Render.
-    # Storage is kept simple below to avoid collectstatic compression missing-file issue.
+    # Serve static files on Render
     "whitenoise.middleware.WhiteNoiseMiddleware",
 
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -100,7 +102,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-
                 "store.context_processors.cart_context",
             ],
         },
@@ -113,8 +114,8 @@ WSGI_APPLICATION = "electric_toy_store_project.wsgi.application"
 
 # =========================
 # Database
-# If DATABASE_URL exists → Neon PostgreSQL
-# If DATABASE_URL missing → SQLite fallback
+# If DATABASE_URL exists -> Neon PostgreSQL
+# If DATABASE_URL missing -> SQLite fallback
 # =========================
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -171,7 +172,7 @@ USE_TZ = True
 
 # =========================
 # Static files
-# CSS / JS / fixed website images
+# CSS / JS / website fixed images
 # =========================
 
 STATIC_URL = "/static/"
@@ -182,16 +183,16 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Compatibility for packages that still read old STATICFILES_STORAGE.
-# We keep static storage simple to avoid Cloudinary/WhiteNoise compression missing-file error.
+# Old compatibility setting for packages that still read STATICFILES_STORAGE.
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+
+# Extra safety: allows WhiteNoise to find files from static/ directory too.
+WHITENOISE_USE_FINDERS = True
 
 
 # =========================
 # Media files
 # Product/category images uploaded from admin
-# If CLOUDINARY_URL exists → Cloudinary
-# If missing → local media folder
 # =========================
 
 MEDIA_URL = "/media/"
@@ -212,10 +213,9 @@ if CLOUDINARY_URL:
     DEFAULT_FILE_STORAGE_BACKEND = "cloudinary_storage.storage.MediaCloudinaryStorage"
 else:
     CLOUDINARY_STORAGE = {}
-
     DEFAULT_FILE_STORAGE_BACKEND = "django.core.files.storage.FileSystemStorage"
 
-# Compatibility for packages that still read old DEFAULT_FILE_STORAGE.
+# Old compatibility setting for packages that still read DEFAULT_FILE_STORAGE.
 DEFAULT_FILE_STORAGE = DEFAULT_FILE_STORAGE_BACKEND
 
 STORAGES = {
